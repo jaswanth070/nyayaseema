@@ -1,18 +1,16 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { FLOWS, type FlowId } from "@/lib/catalog";
+import type { Order } from "@/lib/order";
 import { quote, type QuoteInput } from "@/lib/pricing";
-import { createRazorpayOrder, gatewayConfig } from "@/lib/razorpay";
-import { publicOrder, saveOrder, type Order } from "@/lib/store";
+import { createRazorpayOrder, gatewayConfig, signToken } from "@/lib/razorpay";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 interface Body extends QuoteInput {
-  customer?: { name?: string; email?: string; phone?: string };
+  customer?: { name?: string };
 }
-
-const clip = (v: unknown, n = 120) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 
 export async function POST(req: Request) {
   let body: Body;
@@ -23,13 +21,10 @@ export async function POST(req: Request) {
   }
   if (!body.flow || !(body.flow in FLOWS)) return NextResponse.json({ error: "Unknown service" }, { status: 400 });
 
-  const customer = {
-    name: clip(body.customer?.name),
-    email: clip(body.customer?.email),
-    phone: clip(body.customer?.phone, 20),
-  };
-  if (!customer.name) return NextResponse.json({ error: "Passenger name is required" }, { status: 400 });
+  const name = typeof body.customer?.name === "string" ? body.customer.name.trim().slice(0, 120) : "";
+  if (!name) return NextResponse.json({ error: "Passenger name is required" }, { status: 400 });
 
+  // Server-authoritative pricing: the client never sends an amount.
   const q = quote({
     flow: body.flow as FlowId,
     lawyerId: body.lawyerId,
@@ -48,7 +43,7 @@ export async function POST(req: Request) {
       const ro = await createRazorpayOrder(cfg, {
         amount: q.total,
         receipt,
-        notes: { flow: body.flow, customer: customer.name, lawyer: body.lawyerId ?? "" },
+        notes: { flow: body.flow, customer: name, lawyer: body.lawyerId ?? "" },
       });
       orderId = ro.id;
     } else {
@@ -67,17 +62,16 @@ export async function POST(req: Request) {
     amount: q.total,
     currency: "INR",
     lines: q.lines,
-    status: "created",
-    customer,
+    customer: { name },
     lawyerId: body.lawyerId,
     jurisdictionId: body.jurisdictionId,
     createdAt: new Date().toISOString(),
   };
-  saveOrder(order);
 
   return NextResponse.json({
-    order: publicOrder(order),
-    // Publishable key only — the secret never leaves the server.
+    order,
+    orderToken: signToken({ t: "order", order }),
+    // Publishable key only; the secret never leaves the server.
     keyId: cfg.mode === "live" ? cfg.keyId : null,
   });
 }

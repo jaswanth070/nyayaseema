@@ -1,8 +1,7 @@
 # NyayaSeema — Customs Shield Pass (Razorpay POC)
 
-Proof of concept of the NyayaSeema arrival journey with **Razorpay payments confirmed by webhook**.
-Built with **Next.js (React, TypeScript)** only — no separate backend or database. A webhook needs a
-public HTTPS endpoint, so it is implemented as a Next.js route handler rather than a standalone server.
+Proof of concept of the NyayaSeema arrival journey with **Razorpay payments verified server-side (no webhook)**.
+Built with **Next.js (React, TypeScript)** only — no separate backend or database.
 
 ## Journey
 
@@ -21,35 +20,43 @@ npm install
 npm run dev            # http://localhost:3000
 ```
 
-With no keys it runs in **demo mode**: a simulated gateway signs a webhook and POSTs it to
-`/api/razorpay/webhook`, so the real verification and state machine are exercised end to end.
+With no keys it runs in **demo mode**: a simulated gateway returns a signed payment result that goes through
+the same server-side verification as a real Razorpay payment.
 
-### Switch to real Razorpay
+## Environment variables
 
-1. `cp .env.example .env.local` and fill in `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` (test keys first).
-2. Razorpay Dashboard → Settings → Webhooks → add `https://<public-host>/api/razorpay/webhook`,
-   events `payment.captured`, `payment.failed`, `order.paid`, and set the same secret as `RAZORPAY_WEBHOOK_SECRET`.
-   On localhost, expose the port with a tunnel (ngrok, cloudflared).
-3. Restart. The checkout button now opens Razorpay Checkout.
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `RAZORPAY_KEY_ID` | for live payments | Razorpay API key id (`rzp_test_…` / `rzp_live_…`) |
+| `RAZORPAY_KEY_SECRET` | for live payments | Razorpay API key secret. Server only; never exposed to the browser |
+| `SIGNING_SECRET` | recommended | Long random string that signs order/receipt tokens and CustomsQR passes. Falls back to `RAZORPAY_KEY_SECRET` |
 
-## How payments work
+**There is no webhook and no `RAZORPAY_WEBHOOK_SECRET`.** On Vercel: Project → Settings → Environment Variables,
+add the three above for Production (and Preview if needed), then **redeploy** — env changes only apply to new deployments.
+Without the Razorpay keys the deployed site stays in demo mode.
+
+## How payments work (no webhook)
 
 1. `POST /api/orders` — the **server prices the order** from the catalogue (the client never sends an amount),
-   creates a Razorpay order (`/v1/orders`) and returns the order id + public key id.
-2. The browser opens Razorpay Checkout. Its success callback only navigates to `/status/:id`.
-3. `POST /api/razorpay/webhook` verifies `X-Razorpay-Signature` (HMAC-SHA256 over the raw body), de-duplicates by
-   `X-Razorpay-Event-Id`, checks the amount matches the order, and only then marks it paid. A paid order is terminal.
-4. `/status/:id` polls `GET /api/orders/:id` until the webhook has landed, then shows the outcome
-   (CustomsQR pass, lawyer connected / ready / assigned, receipt).
+   creates a Razorpay order (`/v1/orders`) and returns the public key id plus an HMAC-signed `orderToken`
+   holding the order details.
+2. The browser opens Razorpay Checkout. On success Razorpay hands the browser
+   `razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature`.
+3. `POST /api/payments/verify` checks `HMAC-SHA256("<order_id>|<payment_id>", key_secret)` against the signature,
+   and that the order id matches the signed `orderToken`. Only then does it issue a signed receipt token.
+4. `/receipt?t=…` verifies the token via `GET /api/receipt` and shows the outcome (CustomsQR pass, lawyer connected /
+   ready / assigned, receipt).
 
-`npm run build && npm start`, then `npm run test:webhook` runs 13 checks against the running server
-(bad signature, amount mismatch, duplicates, failed → retry → paid, etc.).
+The app is **stateless** (signed tokens instead of a database), so it works on Vercel's serverless functions.
+
+`npm run build && npm start` (no Razorpay keys), then `npm run test:payment` runs 14 checks: forged or swapped
+signatures, tampered tokens, a payment replayed against another order, receipt integrity, and more.
 
 ## POC limitations (replace before production)
 
 | Area | POC | Production |
 | --- | --- | --- |
-| Order store | In-memory, lost on restart | DB: orders + processed webhook events |
+| Order state | Signed tokens, no database; a verified payment can be replayed to mint another receipt for the same payment | DB with a unique constraint on `payment_id`; reconcile with Razorpay's payments API or a webhook |
 | ICEGATE | Simulated reference after payment | Needs an ICEGATE-authorised duty payment channel; Razorpay cannot pay ICEGATE directly |
 | Receipt scan | Demo extraction (sample items) | Vision/OCR model + FX rate feed |
 | Duty rules | Illustrative: ₹50,000 / ₹15,000 allowance, gold 20 g / 40 g, flat 38.5% (`src/lib/duty.ts`) | Statutory Baggage Rules engine |
@@ -60,7 +67,7 @@ With no keys it runs in **demo mode**: a simulated gateway signs a webhook and P
 
 ## Layout
 
-- `src/app/**` — pages (`arrival`, `category`, `services`, `scanner`, `legal-assistance`, `odr`, `offline`, `checkout`, `status/[id]`)
-- `src/app/api/**` — `orders`, `razorpay/webhook`, `mock/pay` (demo mode only)
-- `src/lib/` — `catalog` (flows, fees, lawyers), `duty`, `pricing`, `razorpay`, `webhook`, `store`, `case` (client state)
+- `src/app/**` — pages (`arrival`, `category`, `services`, `scanner`, `legal-assistance`, `odr`, `offline`, `checkout`, `receipt`)
+- `src/app/api/**` — `orders`, `payments/verify`, `receipt`, `mock/pay` (demo mode only)
+- `src/lib/` — `catalog` (flows, fees, lawyers), `duty`, `pricing`, `razorpay` (verification + signed tokens), `order`, `case` (client state)
 - Branding tokens (navy, gold, cream, Georgia serif) and artwork come from the pitch deck: `src/app/globals.css`, `public/brand/`

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { FLOWS, JURISDICTIONS, formatINR, lawyerById } from "@/lib/catalog";
 import { useCase, type CaseState } from "@/lib/case";
 import { quote, type QuoteInput } from "@/lib/pricing";
-import { MockGateway } from "@/components/MockGateway";
+import { MockGateway, type PaymentResponse } from "@/components/MockGateway";
 import { PageHead, Stepper, useGuard } from "@/components/Ui";
 
 declare global {
@@ -60,9 +60,10 @@ export default function Checkout() {
   const ok = useGuard(["arrival", "category", "flow"]);
   const { state } = useCase();
   const [busy, setBusy] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState("");
-  const [mock, setMock] = useState<{ orderId: string; amount: number } | null>(null);
-  const pending = useRef<{ orderId: string; keyId: string | null; amount: number; key: string } | null>(null);
+  const [mock, setMock] = useState<{ orderToken: string; amount: number } | null>(null);
+  const pending = useRef<{ orderId: string; orderToken: string; keyId: string | null; amount: number; key: string } | null>(null);
 
   const req = useMemo(() => (ok ? buildRequest(state) : null), [ok, state]);
   const q = useMemo(() => (req ? quote(req.quote) : null), [req]);
@@ -71,6 +72,27 @@ export default function Checkout() {
   const stepIndex = flow.steps.findIndex((s) => /payment/i.test(s));
   const lawyer = lawyerById(state.lawyerId);
   const jur = JURISDICTIONS.find((j) => j.id === state.jurisdictionId);
+
+  // No webhook: the signature Razorpay returns to the browser is verified server-side before we trust it.
+  const confirm = async (orderToken: string, r: PaymentResponse) => {
+    setMock(null);
+    setVerifying(true);
+    setError("");
+    try {
+      const res = await fetch("/api/payments/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderToken, ...r }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Payment could not be verified");
+      pending.current = null;
+      router.push(`/receipt?t=${encodeURIComponent(json.receiptToken)}`);
+    } catch (e) {
+      setError(`${(e as Error).message}. If money was debited, contact support with payment ID ${r.razorpay_payment_id}.`);
+      setVerifying(false);
+    }
+  };
 
   const pay = async () => {
     if (!q || "error" in q) return;
@@ -88,12 +110,12 @@ export default function Checkout() {
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error ?? "Could not start payment");
-        o = { orderId: json.order.id, keyId: json.keyId, amount: json.order.amount, key };
+        o = { orderId: json.order.id, orderToken: json.orderToken, keyId: json.keyId, amount: json.order.amount, key };
         pending.current = o;
       }
 
       if (!o.keyId) {
-        setMock({ orderId: o.orderId, amount: o.amount });
+        setMock({ orderToken: o.orderToken, amount: o.amount });
         return;
       }
       if (!(await loadRazorpay()) || !window.Razorpay) throw new Error("Could not load Razorpay Checkout. Check your connection.");
@@ -107,9 +129,7 @@ export default function Checkout() {
         order_id: orderId,
         prefill: { name: req.customer.name, email: req.customer.email, contact: req.customer.phone },
         theme: { color: "#12152b" },
-        // Success here only means "the customer completed checkout". The order is marked paid
-        // by the webhook; the status page waits for it.
-        handler: () => router.push(`/status/${orderId}`),
+        handler: (r: PaymentResponse) => void confirm(o.orderToken, r),
         modal: { ondismiss: () => setBusy(false) },
       });
       rzp.on("payment.failed", () => setError("Payment failed. You can retry with another method."));
@@ -123,7 +143,7 @@ export default function Checkout() {
 
   return (
     <div className="wrap page">
-      <PageHead title="Review and pay" lead="Payments are processed by Razorpay. Your order is confirmed once the payment webhook is received." />
+      <PageHead title="Review and pay" lead="Payments are processed by Razorpay. Your order is confirmed once the server verifies the payment signature." />
       <Stepper steps={flow.steps} current={Math.max(stepIndex, 0)} />
 
       <div className="grid two" style={{ gridTemplateColumns: "minmax(0,1.4fr) minmax(0,1fr)" }}>
@@ -156,8 +176,8 @@ export default function Checkout() {
           <h2>Secure payment</h2>
           <p className="small" style={{ opacity: 0.85 }}>UPI, cards, netbanking and wallets via Razorpay.</p>
           {error && <p className="notice err" role="alert">{error}</p>}
-          <button className="btn gold lg" disabled={busy || !q || "error" in q} onClick={pay}>
-            {busy ? <><span className="spinner" /> Starting…</> : q && !("error" in q) ? `Pay ${formatINR(q.total)}` : "Pay"}
+          <button className="btn gold lg" disabled={busy || verifying || !q || "error" in q} onClick={pay}>
+            {verifying ? <><span className="spinner" /> Verifying payment…</> : busy ? <><span className="spinner" /> Starting…</> : q && !("error" in q) ? `Pay ${formatINR(q.total)}` : "Pay"}
           </button>
           <Link href={flow.href} className="btn ghost on-dark">← Edit details</Link>
         </div>
@@ -166,9 +186,9 @@ export default function Checkout() {
       {mock && (
         <MockGateway
           amount={mock.amount}
-          orderId={mock.orderId}
+          orderToken={mock.orderToken}
           onClose={() => setMock(null)}
-          onDone={() => router.push(`/status/${mock.orderId}`)}
+          onSuccess={(r) => void confirm(mock.orderToken, r)}
         />
       )}
     </div>

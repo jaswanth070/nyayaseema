@@ -1,91 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { use, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { FLOWS, JURISDICTIONS, formatINR, lawyerById } from "@/lib/catalog";
 import { useCase } from "@/lib/case";
-import type { Order } from "@/lib/store";
+import type { Receipt } from "@/lib/order";
 import { PageHead } from "@/components/Ui";
 
 interface Certificate { id: string; issuedAt: string; signature: string; qr: string }
-interface Payload { order: Order; certificate: Certificate | null }
 
 const fmt = (iso?: string) => (iso ? new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—");
 
-export default function StatusPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+function ReceiptView() {
+  const token = useSearchParams().get("t");
   const { reset } = useCase();
-  const [data, setData] = useState<Payload | null>(null);
-  const [missing, setMissing] = useState(false);
-  const [waited, setWaited] = useState(0);
+  const [data, setData] = useState<{ receipt: Receipt; certificate: Certificate | null } | null>(null);
+  const [invalid, setInvalid] = useState(false);
 
-  // The webhook marks the order paid on the server; the browser just waits for that to land.
+  // The receipt is a server-signed token, so this link stays verifiable and cannot be forged or edited.
   useEffect(() => {
-    let stop = false;
-    let timer: number | undefined;
-    const started = Date.now();
-    const tick = async () => {
-      try {
-        const res = await fetch(`/api/orders/${id}`, { cache: "no-store" });
-        if (res.status === 404) return setMissing(true);
-        const json: Payload = await res.json();
-        if (stop) return;
-        setData(json);
-        setWaited(Math.floor((Date.now() - started) / 1000));
-        if (json.order.status === "created") timer = window.setTimeout(tick, 1500);
-      } catch {
-        if (!stop) timer = window.setTimeout(tick, 3000);
-      }
-    };
-    tick();
-    return () => { stop = true; window.clearTimeout(timer); };
-  }, [id]);
+    if (!token) return setInvalid(true);
+    fetch(`/api/receipt?t=${encodeURIComponent(token)}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setData)
+      .catch(() => setInvalid(true));
+  }, [token]);
 
-  if (missing) {
+  if (invalid) {
     return (
       <div className="wrap page">
-        <PageHead title="Order not found" lead="We could not find this order. If the server restarted, the POC's in-memory orders are cleared." />
+        <PageHead title="Receipt not found" lead="This receipt link is missing, incomplete or has been altered." />
         <Link href="/services" className="btn gold">Back to services</Link>
       </div>
     );
   }
-  if (!data) {
-    return <div className="wrap page"><p className="row"><span className="spinner" /> Loading your order…</p></div>;
-  }
+  if (!data) return <div className="wrap page"><p className="row"><span className="spinner" /> Verifying your receipt…</p></div>;
 
-  const { order, certificate } = data;
-  const flow = FLOWS[order.flow];
+  const { receipt, certificate } = data;
+  const { order } = receipt;
   const lawyer = lawyerById(order.lawyerId);
   const jur = JURISDICTIONS.find((j) => j.id === order.jurisdictionId);
-
-  if (order.status === "created") {
-    return (
-      <div className="wrap page">
-        <PageHead title="Confirming your payment" lead="Waiting for the payment confirmation from Razorpay. This usually takes a few seconds." />
-        <div className="card blue row"><span className="spinner" /> <span>Waiting for webhook confirmation… ({waited}s)</span></div>
-        {waited > 25 && (
-          <p className="notice" style={{ marginTop: 16 }}>
-            Still waiting. If you paid, the webhook may not have reached this server yet — on localhost, expose
-            <code> /api/razorpay/webhook</code> with a tunnel and register it in the Razorpay dashboard. Otherwise you can{" "}
-            <Link href="/checkout">try the payment again</Link>.
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  if (order.status === "failed") {
-    return (
-      <div className="wrap page">
-        <PageHead title="Payment unsuccessful" lead={order.failureReason ?? "Your payment could not be completed."} />
-        <div className="actions" style={{ marginTop: 0 }}>
-          <Link href="/checkout" className="btn gold">Try again</Link>
-          <Link href="/services" className="btn ghost">Back to services</Link>
-        </div>
-      </div>
-    );
-  }
 
   const headline: Record<string, { title: string; lead: string }> = {
     scanner: { title: "Your CustomsQR pass is ready", lead: "Present this digital certificate at the airport green-channel e-kiosk." },
@@ -93,20 +49,18 @@ export default function StatusPage({ params }: { params: Promise<{ id: string }>
     odr: { title: "Your lawyer is ready", lead: `${lawyer?.name ?? "Your lawyer"} has been notified and your ODR case workspace is open.` },
     offline: { title: "Lawyer assigned", lead: `${lawyer?.name ?? "Your lawyer"} will represent you at ${jur?.airport ?? "the"} customs jurisdiction.` },
   };
-
   const timeline: Record<string, string[]> = {
     scanner: ["Payment received", "Duty remitted to ICEGATE", "CustomsQR pass issued"],
     legal: ["Payment received", "Lawyer connected", "Duty remitted to ICEGATE"],
     odr: ["Payment received", "Lawyer notified", "Lawyer ready — ODR session open"],
     offline: ["Payment received", "Lawyer assigned", "Appearance scheduled with you by lawyer"],
   };
-
-  // Steps already complete once the payment webhook has landed (ICEGATE remittance is simulated).
+  // Steps already complete once the payment is verified (ICEGATE remittance is simulated).
   const doneCount: Record<string, number> = { scanner: 3, legal: 3, odr: 3, offline: 2 };
 
   return (
     <div className="wrap page">
-      <div className="notice ok" role="status" style={{ marginBottom: 20 }}>✓ Payment confirmed {order.mode === "mock" && "(demo gateway)"}</div>
+      <div className="notice ok" role="status" style={{ marginBottom: 20 }}>✓ Payment verified {order.mode === "mock" && "(demo gateway)"}</div>
       <PageHead title={headline[order.flow].title} lead={headline[order.flow].lead} />
 
       <div className="stack">
@@ -146,9 +100,9 @@ export default function StatusPage({ params }: { params: Promise<{ id: string }>
                 <div><strong>{lawyer.name}</strong><div className="muted small">{lawyer.headline}</div></div>
               </div>
             )}
-            {order.icegate && (
+            {receipt.icegate && (
               <p className="notice small" style={{ marginTop: 16 }}>
-                <strong>ICEGATE remittance (simulated):</strong> {order.icegate.reference} · {formatINR(order.icegate.amountPaise)}.
+                <strong>ICEGATE remittance (simulated):</strong> {receipt.icegate.reference} · {formatINR(receipt.icegate.amountPaise)}.
                 Real remittance needs an ICEGATE-authorised payment channel.
               </p>
             )}
@@ -165,10 +119,11 @@ export default function StatusPage({ params }: { params: Promise<{ id: string }>
               </table>
             </div>
             <dl className="kv" style={{ marginTop: 14 }}>
+              <dt>Service</dt><dd>{FLOWS[order.flow].title}</dd>
               <dt>Receipt no.</dt><dd>{order.receipt}</dd>
               <dt>Order ID</dt><dd className="small">{order.id}</dd>
-              <dt>Payment ID</dt><dd className="small">{order.paymentId ?? "—"}</dd>
-              <dt>Paid at</dt><dd>{fmt(order.paidAt)}</dd>
+              <dt>Payment ID</dt><dd className="small">{receipt.paymentId}</dd>
+              <dt>Paid at</dt><dd>{fmt(receipt.paidAt)}</dd>
             </dl>
           </div>
         </div>
@@ -179,5 +134,13 @@ export default function StatusPage({ params }: { params: Promise<{ id: string }>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReceiptPage() {
+  return (
+    <Suspense fallback={<div className="wrap page"><p className="row"><span className="spinner" /> Loading…</p></div>}>
+      <ReceiptView />
+    </Suspense>
   );
 }

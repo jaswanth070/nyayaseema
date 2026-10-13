@@ -3,16 +3,22 @@
 import { useState } from "react";
 import { formatINR } from "@/lib/catalog";
 
+export interface PaymentResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
 /** Stand-in for Razorpay Checkout while no API keys are configured. */
 export function MockGateway({
   amount,
-  orderId,
-  onDone,
+  orderToken,
+  onSuccess,
   onClose,
 }: {
   amount: number;
-  orderId: string;
-  onDone: () => void;
+  orderToken: string;
+  onSuccess: (r: PaymentResponse) => void;
   onClose: () => void;
 }) {
   const [busy, setBusy] = useState<"success" | "failure" | null>(null);
@@ -21,18 +27,15 @@ export function MockGateway({
   const pay = async (outcome: "success" | "failure") => {
     setBusy(outcome);
     setErr("");
-    try {
-      const res = await fetch("/api/mock/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, outcome }),
-      });
-      if (!res.ok) throw new Error("Demo gateway error");
-      onDone();
-    } catch (e) {
-      setErr((e as Error).message);
-      setBusy(null);
-    }
+    const res = await fetch("/api/mock/pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderToken, outcome }),
+    }).catch(() => null);
+    const json = await res?.json().catch(() => ({}));
+    if (res?.ok) return onSuccess(json as PaymentResponse);
+    setErr(json?.error ?? "Demo gateway error");
+    setBusy(null);
   };
 
   return (
@@ -48,8 +51,8 @@ export function MockGateway({
             <strong className="serif num" style={{ fontSize: "1.5rem", color: "var(--navy)" }}>{formatINR(amount)}</strong>
           </div>
           <p className="notice small">
-            No Razorpay keys are configured, so this simulated gateway stands in for Razorpay Checkout. It sends a signed
-            webhook to <code>/api/razorpay/webhook</code>, exactly as Razorpay would. No real payment is made.
+            No Razorpay keys are configured, so this simulated gateway stands in for Razorpay Checkout. It returns a
+            signed payment result that the server verifies, exactly as it would for Razorpay. No real payment is made.
           </p>
           {err && <p className="error-text" role="alert">{err}</p>}
           <button className="btn gold" disabled={!!busy} onClick={() => pay("success")}>
