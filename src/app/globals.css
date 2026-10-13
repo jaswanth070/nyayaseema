@@ -222,3 +222,6 @@ textarea.input { min-height: 110px; resize: vertical; }
 .table select.input { min-width: 150px; }
 .table select.input.cur { min-width: 88px; }
 .table td input.input { min-width: 110px; }
+
+.team-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding-top: 30px; }
+.team-photo { width: 168px; height: 168px; border-radius: 50%; object-fit: cover; border: 4px solid var(--gold); box-shadow: 0 0 0 4px var(--navy), var(--shadow); background: var(--cream); }

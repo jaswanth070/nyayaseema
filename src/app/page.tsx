@@ -2,6 +2,12 @@ import Link from "next/link";
 import { FLOWS } from "@/lib/catalog";
 import { Icon } from "@/components/Icons";
 
+const TEAM = [
+  { name: "Mufaddal Tambawala", photo: "/team/mufaddal-tambawala.webp", year: "Final Year", focus: "Product development & strategy" },
+  { name: "Surya Teja Telidevara", photo: "/team/surya-teja-telidevara.webp", year: "4th Year", focus: "Legal research & legal framework" },
+  { name: "Mohammed Rehan", photo: "/team/mohammed-rehan.webp", year: "Final Year", focus: "Operations & execution" },
+];
+
 export default function Home() {
   return (
     <>
@@ -33,6 +39,24 @@ export default function Home() {
                 </div>
                 <h3>{FLOWS[id].title}</h3>
                 <p className="muted small">{FLOWS[id].tagline}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="page" aria-labelledby="team-title">
+          <div className="eyebrow">The team</div>
+          <h2 id="team-title" className="page-title" style={{ fontSize: "1.9rem" }}>
+            Meet the people behind NyayaSeema
+          </h2>
+          <hr className="rule" />
+          <div className="grid three">
+            {TEAM.map((m) => (
+              <div key={m.name} className="card gold team-card">
+                <img className="team-photo" src={m.photo} alt={`Portrait of ${m.name}`} width={168} height={168} loading="lazy" />
+                <h3>{m.name}</h3>
+                <span className="pill gold">{m.year}</span>
+                <p className="muted small">{m.focus}</p>
               </div>
             ))}
           </div>
