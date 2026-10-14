@@ -30,17 +30,7 @@ const emptyLegal = (): LegalDetails => ({
 });
 
 export const initialCase = (): CaseState => ({
-  declaration: {
-    passengerName: "",
-    passportNo: "",
-    email: "",
-    phone: "",
-    flightNo: "",
-    arrivingFrom: "",
-    gender: "male",
-    stay: "3d-6m",
-    items: [],
-  },
+  declaration: { gender: "male", stay: "3d-6m", items: [] },
   legal: emptyLegal(),
   offline: emptyLegal(),
   dispute: {

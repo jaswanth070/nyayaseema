@@ -1,6 +1,6 @@
 "use client";
 
-import { LAWYERS, formatINR, JURISDICTIONS, type FlowId } from "@/lib/catalog";
+import { LAWYERS, formatINR, JURISDICTIONS, type PaidFlowId } from "@/lib/catalog";
 
 export function LawyerPicker({
   flow,
@@ -8,7 +8,7 @@ export function LawyerPicker({
   onChange,
   jurisdictionId,
 }: {
-  flow: Exclude<FlowId, "scanner">;
+  flow: PaidFlowId;
   value?: string;
   onChange: (id: string) => void;
   jurisdictionId?: string;

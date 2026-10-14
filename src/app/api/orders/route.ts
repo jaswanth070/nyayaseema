@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
-import { FLOWS, type FlowId } from "@/lib/catalog";
+import { FLOWS, type PaidFlowId } from "@/lib/catalog";
 import type { Order } from "@/lib/order";
 import { quote, type QuoteInput } from "@/lib/pricing";
 import { createRazorpayOrder, gatewayConfig, signToken } from "@/lib/razorpay";
@@ -19,17 +19,16 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
-  if (!body.flow || !(body.flow in FLOWS)) return NextResponse.json({ error: "Unknown service" }, { status: 400 });
+  if (!body.flow || body.flow === ("scanner" as string) || !(body.flow in FLOWS)) return NextResponse.json({ error: "Unknown service" }, { status: 400 });
 
   const name = typeof body.customer?.name === "string" ? body.customer.name.trim().slice(0, 120) : "";
   if (!name) return NextResponse.json({ error: "Passenger name is required" }, { status: 400 });
 
   // Server-authoritative pricing: the client never sends an amount.
   const q = quote({
-    flow: body.flow as FlowId,
+    flow: body.flow as PaidFlowId,
     lawyerId: body.lawyerId,
     jurisdictionId: body.jurisdictionId,
-    declaration: body.declaration,
     estimatedDuty: body.estimatedDuty,
   });
   if ("error" in q) return NextResponse.json({ error: q.error }, { status: 400 });
@@ -58,7 +57,7 @@ export async function POST(req: Request) {
     id: orderId,
     receipt,
     mode: cfg.mode,
-    flow: body.flow as FlowId,
+    flow: body.flow as PaidFlowId,
     amount: q.total,
     currency: "INR",
     lines: q.lines,

@@ -17,14 +17,13 @@ const post = async (path, body) => {
 const none = await post("/api/orders", { flow: "odr", customer: { name: "T" } });
 check("order without lawyer is rejected", none.status === 400, JSON.stringify(none.json));
 
-const scan = await post("/api/orders", {
-  flow: "scanner",
-  customer: { name: "Test Traveller" },
-  declaration: { gender: "male", stay: "3d-6m", items: [{ id: "a", description: "Phone", category: "electronics", amount: 3199, currency: "AED", quantity: 1 }] },
-});
-check("scanner order created", scan.status === 200 && !!scan.json.orderToken, JSON.stringify(scan.json));
-// 3199 AED * 22.7 = 72,617; minus 50,000 -> 22,617 * 38.5% = 8,707.55 duty; + 299 fee
-check("amount computed on the server (₹299 + duty)", scan.json.order.amount === 29900 + 870755, String(scan.json.order.amount));
+const noScanner = await post("/api/orders", { flow: "scanner", customer: { name: "T" } });
+check("scanner is free: it cannot be ordered", noScanner.status === 400, JSON.stringify(noScanner.json));
+
+// lw-001 legal assistance: ₹399 platform + ₹799 lawyer + ₹8,707.55 duty entered by the passenger
+const scan = await post("/api/orders", { flow: "legal", lawyerId: "lw-001", estimatedDuty: 8707.55, customer: { name: "Test Traveller" } });
+check("legal order created", scan.status === 200 && !!scan.json.orderToken, JSON.stringify(scan.json));
+check("amount computed on the server", scan.json.order.amount === 39900 + 79900 + 870755, String(scan.json.order.amount));
 const { orderToken, order } = scan.json;
 
 const pay = await post("/api/mock/pay", { orderToken, outcome: "success" });
@@ -48,10 +47,16 @@ check("valid payment verifies and returns receipt token", ok.status === 200 && !
 
 const rec = await (await fetch(`${BASE}/api/receipt?t=${encodeURIComponent(ok.json.receiptToken)}`)).json();
 check("receipt matches order and payment", rec.receipt?.order.id === order.id && rec.receipt.paymentId === pay.json.razorpay_payment_id);
-check("CustomsQR certificate issued", !!rec.certificate?.id && rec.certificate.qr.includes(rec.certificate.signature));
 check("ICEGATE reference recorded (simulated)", rec.receipt?.icegate?.status === "SIMULATED");
 const forged = await fetch(`${BASE}/api/receipt?t=${encodeURIComponent(ok.json.receiptToken.slice(0, -3) + "AAA")}`);
 check("altered receipt token rejected", forged.status === 400);
+
+// free receipt scanner: signed pass, no payment
+const item = { id: "a", description: "Phone", category: "electronics", amount: 3199, currency: "AED", quantity: 1 };
+const sp = await post("/api/scan/pass", { items: [item] });
+// 3199 AED * 22.7 = 72,617; minus 50,000 -> 22,617 * 38.5% = 8,707.55
+check("scan pass issued without payment", sp.status === 200 && sp.json.certificate.dutyPaise === 870755 && sp.json.certificate.qr.includes(sp.json.certificate.signature), JSON.stringify(sp.json));
+check("scan pass rejects empty scan", (await post("/api/scan/pass", { items: [] })).status === 400);
 
 console.log(failed ? `\n${failed} check(s) failed` : "\nAll checks passed");
 process.exit(failed ? 1 : 0);

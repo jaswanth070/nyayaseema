@@ -15,7 +15,7 @@ const ICONS: Record<FlowId, React.ReactNode> = {
 };
 
 const FROM: Record<FlowId, string> = {
-  scanner: `from ${formatINR(FLOWS.scanner.platformFee)}`,
+  scanner: "Free · no forms",
   legal: `from ${formatINR(FLOWS.legal.platformFee)}`,
   odr: `from ${formatINR(FLOWS.odr.platformFee)}`,
   offline: "lawyer fee only",

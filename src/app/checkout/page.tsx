@@ -28,13 +28,6 @@ function loadRazorpay(): Promise<boolean> {
 
 function buildRequest(s: CaseState): { quote: QuoteInput; customer: { name: string; email: string; phone: string } } | null {
   switch (s.flow) {
-    case "scanner": {
-      const d = s.declaration;
-      return {
-        quote: { flow: "scanner", declaration: { items: d.items, gender: d.gender, stay: d.stay } },
-        customer: { name: d.passengerName, email: d.email, phone: d.phone },
-      };
-    }
     case "legal":
       return {
         quote: { flow: "legal", lawyerId: s.lawyerId, estimatedDuty: s.legal.estimatedDuty },
@@ -67,7 +60,7 @@ export default function Checkout() {
 
   const req = useMemo(() => (ok ? buildRequest(state) : null), [ok, state]);
   const q = useMemo(() => (req ? quote(req.quote) : null), [req]);
-  if (!ok || !req || !state.flow) return null;
+  if (!ok || !req || !state.flow || state.flow === "scanner") return null;
   const flow = FLOWS[state.flow];
   const stepIndex = flow.steps.findIndex((s) => /payment/i.test(s));
   const lawyer = lawyerById(state.lawyerId);

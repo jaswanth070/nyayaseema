@@ -2,6 +2,8 @@
 // All lawyer records are fictitious sample data for the POC.
 
 export type FlowId = "scanner" | "legal" | "odr" | "offline";
+/** Flows that go through Razorpay. The receipt scanner is free. */
+export type PaidFlowId = Exclude<FlowId, "scanner">;
 
 export interface FlowInfo {
   id: FlowId;
@@ -17,11 +19,10 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
   scanner: {
     id: "scanner",
     title: "Receipt Scanner",
-    tagline:
-      "Scan your overseas receipts, get the exact statutory duty and a signed CustomsQR declaration pass.",
+    tagline: "Free and form-free. Scan your overseas receipts to see your estimated duty and get a signed CustomsQR pass.",
     href: "/scanner",
-    platformFee: 29900,
-    steps: ["Passenger profile", "Scan receipts", "Duty summary", "Payment", "CustomsQR pass"],
+    platformFee: 0,
+    steps: ["Scan receipts", "Estimated duty", "CustomsQR pass"],
   },
   legal: {
     id: "legal",
@@ -191,13 +192,8 @@ export interface LineItem {
   grams?: number;
 }
 
+/** Inputs to the duty calculation. The scanner assumes defaults because it collects no forms. */
 export interface Declaration {
-  passengerName: string;
-  passportNo: string;
-  email: string;
-  phone: string;
-  flightNo: string;
-  arrivingFrom: string;
   gender: Gender;
   stay: StayBand;
   items: LineItem[];

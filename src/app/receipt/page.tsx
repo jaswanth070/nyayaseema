@@ -3,20 +3,17 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { QRCodeSVG } from "qrcode.react";
 import { FLOWS, JURISDICTIONS, formatINR, lawyerById } from "@/lib/catalog";
 import { useCase } from "@/lib/case";
 import type { Receipt } from "@/lib/order";
 import { PageHead } from "@/components/Ui";
-
-interface Certificate { id: string; issuedAt: string; signature: string; qr: string }
 
 const fmt = (iso?: string) => (iso ? new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—");
 
 function ReceiptView() {
   const token = useSearchParams().get("t");
   const { reset } = useCase();
-  const [data, setData] = useState<{ receipt: Receipt; certificate: Certificate | null } | null>(null);
+  const [data, setData] = useState<{ receipt: Receipt } | null>(null);
   const [invalid, setInvalid] = useState(false);
 
   // The receipt is a server-signed token, so this link stays verifiable and cannot be forged or edited.
@@ -38,25 +35,23 @@ function ReceiptView() {
   }
   if (!data) return <div className="wrap page"><p className="row"><span className="spinner" /> Verifying your receipt…</p></div>;
 
-  const { receipt, certificate } = data;
+  const { receipt } = data;
   const { order } = receipt;
   const lawyer = lawyerById(order.lawyerId);
   const jur = JURISDICTIONS.find((j) => j.id === order.jurisdictionId);
 
   const headline: Record<string, { title: string; lead: string }> = {
-    scanner: { title: "Your CustomsQR pass is ready", lead: "Present this digital certificate at the airport green-channel e-kiosk." },
     legal: { title: "Lawyer connected — declaration in progress", lead: `${lawyer?.name ?? "Your lawyer"} has your documents and will finalise the declaration.` },
     odr: { title: "Your lawyer is ready", lead: `${lawyer?.name ?? "Your lawyer"} has been notified and your ODR case workspace is open.` },
     offline: { title: "Lawyer assigned", lead: `${lawyer?.name ?? "Your lawyer"} will represent you at ${jur?.airport ?? "the"} customs jurisdiction.` },
   };
   const timeline: Record<string, string[]> = {
-    scanner: ["Payment received", "Duty remitted to ICEGATE", "CustomsQR pass issued"],
     legal: ["Payment received", "Lawyer connected", "Duty remitted to ICEGATE"],
     odr: ["Payment received", "Lawyer notified", "Lawyer ready — ODR session open"],
     offline: ["Payment received", "Lawyer assigned", "Appearance scheduled with you by lawyer"],
   };
   // Steps already complete once the payment is verified (ICEGATE remittance is simulated).
-  const doneCount: Record<string, number> = { scanner: 3, legal: 3, odr: 3, offline: 2 };
+  const doneCount: Record<string, number> = { legal: 3, odr: 3, offline: 2 };
 
   return (
     <div className="wrap page">
@@ -64,25 +59,6 @@ function ReceiptView() {
       <PageHead title={headline[order.flow].title} lead={headline[order.flow].lead} />
 
       <div className="stack">
-        {certificate && (
-          <div className="cert">
-            <div className="cert-head">
-              <span className="serif">CustomsQR Declaration Pass</span>
-              <span className="pill gold">Green Channel</span>
-            </div>
-            <div className="cert-body">
-              <dl className="kv">
-                <dt>Certificate ID</dt><dd>{certificate.id}</dd>
-                <dt>Passenger</dt><dd>{order.customer.name}</dd>
-                <dt>Issued</dt><dd>{fmt(certificate.issuedAt)}</dd>
-                <dt>Duty paid</dt><dd className="num">{formatINR(order.lines.find((l) => l.kind === "duty")?.amount ?? 0)}</dd>
-                <dt>Signature</dt><dd className="small" style={{ fontFamily: "ui-monospace, monospace" }}>{certificate.signature}</dd>
-              </dl>
-              <div className="qr-box"><QRCodeSVG value={certificate.qr} size={150} fgColor="#12152b" /></div>
-            </div>
-          </div>
-        )}
-
         <div className="grid two">
           <div className="card blue">
             <h2>What happens next</h2>

@@ -7,7 +7,7 @@ Built with **Next.js (React, TypeScript)** only — no separate backend or datab
 
 ```
 Arrival: Indian | Foreign  →  Category: Tourist | OCI holder  →  Services
-├─ Receipt Scanner            profile → scan receipts → duty summary → pay → signed CustomsQR pass
+├─ Receipt Scanner            FREE, no forms: scan receipts → estimated duty → signed CustomsQR pass
 ├─ Legal Assistance           choose lawyer → fill documents → pay (fee + duty → ICEGATE)
 ├─ Lawyer for ODR             case details + bills → choose lawyer → pay → lawyer ready
 └─ Lawyer for Offline         fill document → jurisdiction → lawyer → pay → lawyer assigned
