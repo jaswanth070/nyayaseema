@@ -5,12 +5,15 @@ export type FlowId = "scanner" | "legal" | "odr" | "offline";
 /** Flows that go through Razorpay. The item scanner is free. */
 export type PaidFlowId = Exclude<FlowId, "scanner">;
 
+/** Flat ₹999 platform fee for every lawyer service. The lawyer's own fee is added on top. */
+export const PLATFORM_FEE = 99900;
+
 export interface FlowInfo {
   id: FlowId;
   title: string;
   tagline: string;
   href: string;
-  /** Platform fee in paise (₹ x 100). Ranges follow the business-model slide. */
+  /** NyayaSeema platform fee in paise (₹ x 100), charged on top of the lawyer's fee. */
   platformFee: number;
   steps: string[];
 }
@@ -23,7 +26,7 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
       "Bringing products from abroad to India? Scan your item before you buy to review relevant customs information and estimated duty.",
     href: "/scanner",
     platformFee: 0,
-    steps: ["Scan item", "Duty summary"],
+    steps: ["Scan Item", "Duty Summary"],
   },
   legal: {
     id: "legal",
@@ -31,8 +34,8 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
     tagline:
       "Connect with legal assistance, understand the applicable requirements, and prepare your documents with greater confidence.",
     href: "/legal-assistance",
-    platformFee: 39900,
-    steps: ["Connect to lawyer", "Fill documents", "Payment", "ICEGATE remittance"],
+    platformFee: PLATFORM_FEE,
+    steps: ["Connect to Lawyer", "Fill Documents", "Payment", "ICEGATE Remittance"],
   },
   odr: {
     id: "odr",
@@ -40,8 +43,8 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
     tagline:
       "Stopped at customs? Submit your dispute details and request virtual legal assistance, where available.",
     href: "/odr",
-    platformFee: 99900,
-    steps: ["Case details & bills", "Choose lawyer", "Payment to lawyer", "Lawyer ready"],
+    platformFee: PLATFORM_FEE,
+    steps: ["Case Details & Bills", "Choose Lawyer", "Payment to Lawyer", "Lawyer Ready"],
   },
   offline: {
     id: "offline",
@@ -49,8 +52,8 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
     tagline:
       "Need further action? Find a suitable lawyer near the relevant court or tribunal for the next stage of your case.",
     href: "/offline",
-    platformFee: 0,
-    steps: ["Fill document", "Choose jurisdiction", "Choose lawyer", "Payment", "Lawyer assigned"],
+    platformFee: PLATFORM_FEE,
+    steps: ["Fill Document", "Choose Jurisdiction", "Choose Lawyer", "Payment", "Lawyer Assigned"],
   },
 };
 
@@ -93,7 +96,7 @@ export const LAWYERS: Lawyer[] = [
     id: "lw-001",
     name: "Adv. Ananya Rao",
     initials: "AR",
-    headline: "Customs valuation & baggage-rule disputes",
+    headline: "Customs Valuation & Baggage-Rule Disputes",
     experienceYears: 14,
     rating: 4.9,
     cases: 612,
@@ -106,7 +109,7 @@ export const LAWYERS: Lawyer[] = [
     id: "lw-002",
     name: "Adv. Rohan Mehta",
     initials: "RM",
-    headline: "Gold & jewellery classification, seizure appeals",
+    headline: "Gold & Jewellery Classification, Seizure Appeals",
     experienceYears: 11,
     rating: 4.8,
     cases: 438,
@@ -119,7 +122,7 @@ export const LAWYERS: Lawyer[] = [
     id: "lw-003",
     name: "Adv. Kavitha Nair",
     initials: "KN",
-    headline: "Electronics & personal-effects reclassification",
+    headline: "Electronics & Personal-Effects Reclassification",
     experienceYears: 9,
     rating: 4.7,
     cases: 301,
@@ -132,7 +135,7 @@ export const LAWYERS: Lawyer[] = [
     id: "lw-004",
     name: "Adv. Imran Siddiqui",
     initials: "IS",
-    headline: "Non-commercial quantity audits, OCI & NRI baggage",
+    headline: "Non-Commercial Quantity Audits, OCI & NRI Baggage",
     experienceYears: 17,
     rating: 4.9,
     cases: 884,
@@ -145,7 +148,7 @@ export const LAWYERS: Lawyer[] = [
     id: "lw-005",
     name: "Adv. Sneha Banerjee",
     initials: "SB",
-    headline: "Adjudication hearings & CESTAT representation",
+    headline: "Adjudication Hearings & CESTAT Representation",
     experienceYears: 12,
     rating: 4.6,
     cases: 356,
@@ -158,7 +161,7 @@ export const LAWYERS: Lawyer[] = [
     id: "lw-006",
     name: "Adv. Vikram Desai",
     initials: "VD",
-    headline: "Airport customs seizures & provisional release",
+    headline: "Airport Customs Seizures & Provisional Release",
     experienceYears: 8,
     rating: 4.5,
     cases: 227,
@@ -225,7 +228,7 @@ export interface DisputeDetails {
   documents: string[];
 }
 
-export const formatINR = (paise: number) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(
+export const formatINR = (paise: number, fractionDigits = 2) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }).format(
     paise / 100,
   );

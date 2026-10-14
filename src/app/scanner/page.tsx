@@ -62,7 +62,7 @@ export default function ScannerFlow() {
       {step === 0 && (
         <div className="stack">
           <div className="card blue">
-            <h2>Scan your item</h2>
+            <h2>Scan Your Item</h2>
             <p className="muted small" style={{ margin: "6px 0 16px" }}>
               Point your camera at the product or its barcode, or upload a photo. The item and its price are read automatically — nothing to type.
             </p>
@@ -70,19 +70,19 @@ export default function ScannerFlow() {
               {preview && <img className="preview" src={preview} alt="Scanned item preview" />}
               {scanning && (<><div className="frame" /><div className="beam" /></>)}
               <div style={{ position: "relative" }}>
-                <strong style={{ fontSize: "1.1rem" }}>{scanning ? "Identifying item…" : "Ready to scan"}</strong>
+                <strong style={{ fontSize: "1.1rem" }}>{scanning ? "Identifying Item…" : "Ready to scan"}</strong>
                 <div style={{ opacity: 0.85, margin: "6px 0 16px", fontSize: "0.9rem" }}>
                   {scanning ? "Reading product details and price" : "Camera capture on mobile · file upload on desktop"}
                 </div>
                 <label className="btn gold" style={{ cursor: scanning ? "wait" : "pointer", opacity: scanning ? 0.6 : 1 }}>
-                  {scanning ? "Scanning…" : items.length ? "Scan another item" : "Open scanner / upload photo"}
+                  {scanning ? "Scanning…" : items.length ? "Scan Another Item" : "Open Scanner / Upload Photo"}
                   <input type="file" accept="image/*" capture="environment" disabled={scanning} style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
                     onChange={(e) => { onScan(e.target.files?.[0]); e.target.value = ""; }} />
                 </label>
               </div>
             </div>
             <p className="notice" style={{ marginTop: 14 }}>
-              <strong>Demo extraction.</strong> This POC does not run a recognition model yet — each scan adds a sample item.
+              <strong>Demo Extraction.</strong> This POC does not run a recognition model yet — each scan adds a sample item.
             </p>
           </div>
 
@@ -102,7 +102,7 @@ export default function ScannerFlow() {
 
           <div className="actions" style={{ marginTop: 0 }}>
             <Link href="/services" className="btn ghost">← Back</Link>
-            <button className="btn gold" disabled={items.length === 0 || scanning} onClick={() => setStep(1)}>See duty summary →</button>
+            <button className="btn gold" disabled={items.length === 0 || scanning} onClick={() => setStep(1)}>See Duty Summary →</button>
           </div>
         </div>
       )}
@@ -110,37 +110,37 @@ export default function ScannerFlow() {
       {step === 1 && result && (
         <div className="stack">
           <div className="card blue">
-            <h2>Duty summary</h2>
+            <h2>Duty Summary</h2>
             <div className="tablewrap" style={{ marginTop: 12 }}>
               <table className="table">
                 <thead><tr><th>Item</th><th className="r">Value (INR)</th></tr></thead>
                 <tbody>
                   {result.pricedItems.map((i) => (
-                    <tr key={i.id}><td>{i.description} <span className="muted small">× {i.quantity} · {i.category}</span></td><td className="r num">{formatINR(i.inr * 100)}</td></tr>
+                    <tr key={i.id}><td>{i.description} <span className="muted small">× {i.quantity} · <span style={{ textTransform: "capitalize" }}>{i.category.replace("-", " & ")}</span></span></td><td className="r num">{formatINR(i.inr * 100)}</td></tr>
                   ))}
-                  <tr><td><strong>Total value</strong></td><td className="r num"><strong>{formatINR(result.totalValue * 100)}</strong></td></tr>
+                  <tr><td><strong>Total Value</strong></td><td className="r num"><strong>{formatINR(result.totalValue * 100)}</strong></td></tr>
                 </tbody>
               </table>
             </div>
             <dl className="kv" style={{ marginTop: 16, gridTemplateColumns: "210px 1fr" }}>
-              <dt>Free allowance</dt><dd className="num">{formatINR(result.generalAllowance * 100)}</dd>
-              <dt>Dutiable value</dt><dd className="num">{formatINR(result.totalDutiable * 100)}</dd>
-              <dt>Estimated duty @ {(FLAT_DUTY_RATE * 100).toFixed(1)}%</dt><dd className="num"><strong>{formatINR(Math.round(result.duty * 100))}</strong></dd>
+              <dt>Free Allowance</dt><dd className="num">{formatINR(result.generalAllowance * 100)}</dd>
+              <dt>Dutiable Value</dt><dd className="num">{formatINR(result.totalDutiable * 100)}</dd>
+              <dt>Estimated Duty @ {(FLAT_DUTY_RATE * 100).toFixed(1)}%</dt><dd className="num"><strong>{formatINR(Math.round(result.duty * 100))}</strong></dd>
             </dl>
           </div>
 
           <div className="card">
-            <h2>Relevant customs information</h2>
+            <h2>Relevant Customs Information</h2>
             <ul style={{ margin: "12px 0 0 18px", padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
               {categories.map((c) => <li key={c}><strong style={{ textTransform: "capitalize" }}>{c.replace("-", " & ")}:</strong> {CUSTOMS_INFO[c]}</li>)}
             </ul>
             {result.commercialFlags.length > 0 ? (
               <div className="notice err" style={{ marginTop: 14 }}>
-                <strong>Quantity check:</strong>
+                <strong>Quantity Check:</strong>
                 <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>{result.commercialFlags.map((f) => <li key={f}>{f}</li>)}</ul>
               </div>
             ) : (
-              <div className="notice ok" style={{ marginTop: 14 }}>Quantity check passed: items look like personal use.</div>
+              <div className="notice ok" style={{ marginTop: 14 }}>Quantity Check Passed: items look like personal use.</div>
             )}
             <p className="muted small" style={{ marginTop: 12 }}>
               Estimate assumes a stay abroad of 3 days to 6 months, so only the standard allowance applies. Rates are illustrative for this POC and are not legal advice.
@@ -148,7 +148,7 @@ export default function ScannerFlow() {
           </div>
 
           <div className="actions" style={{ marginTop: 0 }}>
-            <button className="btn ghost" onClick={() => setStep(0)}>← Scan more</button>
+            <button className="btn ghost" onClick={() => setStep(0)}>← Scan More</button>
             <Link href="/services" className="btn gold" onClick={() => setItems([])}>Done</Link>
           </div>
         </div>

@@ -23,6 +23,11 @@ npm run dev            # http://localhost:3000
 With no keys it runs in **demo mode**: a simulated gateway returns a signed payment result that goes through
 the same server-side verification as a real Razorpay payment.
 
+## Pricing
+
+Every lawyer service (Legal Assistance, ODR, Offline) costs a flat **₹999 NyayaSeema platform fee + the lawyer's fee**
+(`PLATFORM_FEE` in `src/lib/catalog.ts`). Legal Assistance also collects the declared duty. The Item Scanner is free.
+
 ## Environment variables
 
 | Variable | Required | Purpose |

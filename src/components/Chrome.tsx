@@ -17,7 +17,7 @@ export function Header() {
   return (
     <header className="topbar">
       <div className="wrap">
-        <Link href="/" className="brand" aria-label="NyayaSeema home">
+        <Link href="/" className="brand" aria-label="NyayaSeema Home">
           <Logo />
           <span>
             <span className="brand-name">NyayaSeema</span>

@@ -28,8 +28,8 @@ function ReceiptView() {
   if (invalid) {
     return (
       <div className="wrap page">
-        <PageHead title="Receipt not found" lead="This receipt link is missing, incomplete or has been altered." />
-        <Link href="/services" className="btn gold">Back to services</Link>
+        <PageHead title="Receipt Not Found" lead="This receipt link is missing, incomplete or has been altered." />
+        <Link href="/services" className="btn gold">Back to Services</Link>
       </div>
     );
   }
@@ -41,27 +41,27 @@ function ReceiptView() {
   const jur = JURISDICTIONS.find((j) => j.id === order.jurisdictionId);
 
   const headline: Record<string, { title: string; lead: string }> = {
-    legal: { title: "Lawyer connected — declaration in progress", lead: `${lawyer?.name ?? "Your lawyer"} has your documents and will finalise the declaration.` },
-    odr: { title: "Your lawyer is ready", lead: `${lawyer?.name ?? "Your lawyer"} has been notified and your ODR case workspace is open.` },
-    offline: { title: "Lawyer assigned", lead: `${lawyer?.name ?? "Your lawyer"} will represent you at ${jur?.airport ?? "the"} customs jurisdiction.` },
+    legal: { title: "Lawyer Connected — Declaration in Progress", lead: `${lawyer?.name ?? "Your lawyer"} has your documents and will finalise the declaration.` },
+    odr: { title: "Your Lawyer Is Ready", lead: `${lawyer?.name ?? "Your lawyer"} has been notified and your ODR case workspace is open.` },
+    offline: { title: "Lawyer Assigned", lead: `${lawyer?.name ?? "Your lawyer"} will represent you at ${jur?.airport ?? "the"} customs jurisdiction.` },
   };
   const timeline: Record<string, string[]> = {
-    legal: ["Payment received", "Lawyer connected", "Duty remitted to ICEGATE"],
-    odr: ["Payment received", "Lawyer notified", "Lawyer ready — ODR session open"],
-    offline: ["Payment received", "Lawyer assigned", "Appearance scheduled with you by lawyer"],
+    legal: ["Payment Received", "Lawyer Connected", "Duty Remitted to ICEGATE"],
+    odr: ["Payment Received", "Lawyer Notified", "Lawyer Ready — ODR Session Open"],
+    offline: ["Payment Received", "Lawyer Assigned", "Appearance Scheduled With You by Lawyer"],
   };
   // Steps already complete once the payment is verified (ICEGATE remittance is simulated).
   const doneCount: Record<string, number> = { legal: 3, odr: 3, offline: 2 };
 
   return (
     <div className="wrap page">
-      <div className="notice ok" role="status" style={{ marginBottom: 20 }}>✓ Payment verified {order.mode === "mock" && "(demo gateway)"}</div>
+      <div className="notice ok" role="status" style={{ marginBottom: 20 }}>✓ Payment Verified {order.mode === "mock" && "(Demo Gateway)"}</div>
       <PageHead title={headline[order.flow].title} lead={headline[order.flow].lead} />
 
       <div className="stack">
         <div className="grid two">
           <div className="card blue">
-            <h2>What happens next</h2>
+            <h2>What Happens Next</h2>
             <ul className="timeline" style={{ marginTop: 16 }}>
               {timeline[order.flow].map((t, i) => (
                 <li key={t} className={i < doneCount[order.flow] ? "done" : i === doneCount[order.flow] ? "now" : ""}>
@@ -78,7 +78,7 @@ function ReceiptView() {
             )}
             {receipt.icegate && (
               <p className="notice small" style={{ marginTop: 16 }}>
-                <strong>ICEGATE remittance (simulated):</strong> {receipt.icegate.reference} · {formatINR(receipt.icegate.amountPaise)}.
+                <strong>ICEGATE Remittance (Simulated):</strong> {receipt.icegate.reference} · {formatINR(receipt.icegate.amountPaise)}.
                 Real remittance needs an ICEGATE-authorised payment channel.
               </p>
             )}
@@ -90,22 +90,22 @@ function ReceiptView() {
               <table className="table">
                 <tbody>
                   {order.lines.map((l) => <tr key={l.label}><td>{l.label}</td><td className="r num">{formatINR(l.amount)}</td></tr>)}
-                  <tr className="total-row"><td>Total paid</td><td className="r num">{formatINR(order.amount)}</td></tr>
+                  <tr className="total-row"><td>Total Paid</td><td className="r num">{formatINR(order.amount)}</td></tr>
                 </tbody>
               </table>
             </div>
             <dl className="kv" style={{ marginTop: 14 }}>
               <dt>Service</dt><dd>{FLOWS[order.flow].title}</dd>
-              <dt>Receipt no.</dt><dd>{order.receipt}</dd>
+              <dt>Receipt No.</dt><dd>{order.receipt}</dd>
               <dt>Order ID</dt><dd className="small">{order.id}</dd>
               <dt>Payment ID</dt><dd className="small">{receipt.paymentId}</dd>
-              <dt>Paid at</dt><dd>{fmt(receipt.paidAt)}</dd>
+              <dt>Paid At</dt><dd>{fmt(receipt.paidAt)}</dd>
             </dl>
           </div>
         </div>
 
         <div className="actions" style={{ marginTop: 0 }}>
-          <Link href="/services" className="btn ghost">Use another service</Link>
+          <Link href="/services" className="btn ghost">Use Another Service</Link>
           <Link href="/" className="btn gold" onClick={reset}>Finish</Link>
         </div>
       </div>

@@ -20,10 +20,10 @@ check("order without lawyer is rejected", none.status === 400, JSON.stringify(no
 const noScanner = await post("/api/orders", { flow: "scanner", customer: { name: "T" } });
 check("scanner is free: it cannot be ordered", noScanner.status === 400, JSON.stringify(noScanner.json));
 
-// lw-001 legal assistance: ₹399 platform + ₹799 lawyer + ₹8,707.55 duty entered by the passenger
+// lw-001 legal assistance: ₹999 platform fee + ₹799 lawyer's fee + ₹8,707.55 duty entered by the passenger
 const scan = await post("/api/orders", { flow: "legal", lawyerId: "lw-001", estimatedDuty: 8707.55, customer: { name: "Test Traveller" } });
 check("legal order created", scan.status === 200 && !!scan.json.orderToken, JSON.stringify(scan.json));
-check("amount computed on the server", scan.json.order.amount === 39900 + 79900 + 870755, String(scan.json.order.amount));
+check("amount computed on the server", scan.json.order.amount === 99900 + 79900 + 870755, String(scan.json.order.amount));
 const { orderToken, order } = scan.json;
 
 const pay = await post("/api/mock/pay", { orderToken, outcome: "success" });
@@ -38,6 +38,8 @@ const swapped = await post("/api/payments/verify", { orderToken, ...pay.json, ra
 check("signature bound to payment id", swapped.status === 400);
 const tampered = await post("/api/payments/verify", { orderToken: orderToken.replace(/^./, (c) => (c === "A" ? "B" : "A")), ...pay.json });
 check("tampered order token rejected", tampered.status === 400);
+const offline = await post("/api/orders", { flow: "offline", lawyerId: "lw-002", jurisdictionId: "bom", customer: { name: "O" } });
+check("offline order is ₹999 + lawyer's fee", offline.json.order?.amount === 99900 + 299900, String(offline.json.order?.amount));
 const other = await post("/api/orders", { flow: "odr", lawyerId: "lw-001", customer: { name: "Other" } });
 const wrongOrder = await post("/api/payments/verify", { orderToken: other.json.orderToken, ...pay.json });
 check("payment for a different order rejected", wrongOrder.status === 400);

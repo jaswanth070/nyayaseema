@@ -136,7 +136,7 @@ export default function Checkout() {
 
   return (
     <div className="wrap page">
-      <PageHead title="Review and pay" lead="Payments are processed by Razorpay. Your order is confirmed once the server verifies the payment signature." />
+      <PageHead title="Review and Pay" lead="Payments are processed by Razorpay. Your order is confirmed once the server verifies the payment signature." />
       <Stepper steps={flow.steps} current={Math.max(stepIndex, 0)} />
 
       <div className="grid two" style={{ gridTemplateColumns: "minmax(0,1.4fr) minmax(0,1fr)" }}>
@@ -148,7 +148,7 @@ export default function Checkout() {
             {jur ? ` · ${jur.airport} (${jur.code})` : ""}
           </p>
           {q && "error" in q ? (
-            <p className="notice err">{q.error}. <Link href={flow.href}>Go back</Link></p>
+            <p className="notice err">{q.error}. <Link href={flow.href}>Go Back</Link></p>
           ) : (
             q && (
               <div className="tablewrap">
@@ -166,13 +166,13 @@ export default function Checkout() {
         </div>
 
         <div className="card navy stack" style={{ alignSelf: "start" }}>
-          <h2>Secure payment</h2>
+          <h2>Secure Payment</h2>
           <p className="small" style={{ opacity: 0.85 }}>UPI, cards, netbanking and wallets via Razorpay.</p>
           {error && <p className="notice err" role="alert">{error}</p>}
           <button className="btn gold lg" disabled={busy || verifying || !q || "error" in q} onClick={pay}>
-            {verifying ? <><span className="spinner" /> Verifying payment…</> : busy ? <><span className="spinner" /> Starting…</> : q && !("error" in q) ? `Pay ${formatINR(q.total)}` : "Pay"}
+            {verifying ? <><span className="spinner" /> Verifying Payment…</> : busy ? <><span className="spinner" /> Starting…</> : q && !("error" in q) ? `Pay ${formatINR(q.total)}` : "Pay"}
           </button>
-          <Link href={flow.href} className="btn ghost on-dark">← Edit details</Link>
+          <Link href={flow.href} className="btn ghost on-dark">← Edit Details</Link>
         </div>
       </div>
 

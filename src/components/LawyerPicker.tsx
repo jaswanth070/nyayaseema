@@ -16,7 +16,7 @@ export function LawyerPicker({
   const list = LAWYERS.filter((l) => (jurisdictionId ? l.jurisdictions.includes(jurisdictionId) : true));
   if (list.length === 0) return <div className="notice">No lawyers are listed for this jurisdiction yet.</div>;
   return (
-    <div className="stack" role="radiogroup" aria-label="Choose a lawyer">
+    <div className="stack" role="radiogroup" aria-label="Choose a Lawyer">
       {list.map((l) => (
         <button
           key={l.id}
@@ -38,14 +38,14 @@ export function LawyerPicker({
                 <span key={j} className="pill">{JURISDICTIONS.find((x) => x.id === j)?.code}</span>
               ))}
               {flow === "odr" && (
-                <span className={`pill ${l.online ? "ok" : ""}`}>{l.online ? "Online now" : "Next-day slot"}</span>
+                <span className={`pill ${l.online ? "ok" : ""}`}>{l.online ? "Online Now" : "Next-Day Slot"}</span>
               )}
             </span>
           </span>
           <span className="fee">
             <strong className="num">{formatINR(l.fees[flow])}</strong>
             <span className="muted small" style={{ display: "block" }}>
-              {flow === "legal" ? "assistance fee" : flow === "odr" ? "per ODR session" : "per appearance"}
+              {flow === "legal" ? "Lawyer's Fee" : flow === "odr" ? "Lawyer's Fee · Per Session" : "Lawyer's Fee · Per Appearance"}
             </span>
           </span>
         </button>

@@ -39,12 +39,11 @@ export function quote(input: QuoteInput): Quote | { error: string } {
   }
 
   if (info.platformFee > 0) {
-    const label = input.flow === "odr" ? "ODR session fee" : "Platform convenience fee";
-    lines.push({ label, amount: info.platformFee, kind: "fee" });
+    lines.push({ label: "NyayaSeema Platform Fee", amount: info.platformFee, kind: "fee" });
   }
 
-  const role = input.flow === "legal" ? "declaration assistance" : input.flow === "odr" ? "ODR representation" : "offline representation";
-  lines.push({ label: `${lawyer.name} – ${role}`, amount: lawyer.fees[input.flow], kind: "lawyer" });
+  const role = input.flow === "legal" ? "Declaration Assistance" : input.flow === "odr" ? "ODR Representation" : "Offline Representation";
+  lines.push({ label: `${lawyer.name} – ${role} (Lawyer's Fee)`, amount: lawyer.fees[input.flow], kind: "lawyer" });
 
   if (input.flow === "legal") {
     const e = Number(input.estimatedDuty ?? 0);
@@ -52,7 +51,7 @@ export function quote(input: QuoteInput): Quote | { error: string } {
     dutyPaise = Math.round(e * 100);
   }
 
-  if (dutyPaise > 0) lines.push({ label: "Customs duty (remitted to ICEGATE)", amount: dutyPaise, kind: "duty" });
+  if (dutyPaise > 0) lines.push({ label: "Customs Duty (Remitted to ICEGATE)", amount: dutyPaise, kind: "duty" });
 
   const total = lines.reduce((s, l) => s + l.amount, 0);
   if (total < 100) return { error: "Order total is below the minimum of ₹1" };

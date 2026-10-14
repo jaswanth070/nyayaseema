@@ -20,7 +20,7 @@ export default function CategoryPage() {
   return (
     <div className="wrap page">
       <PageHead
-        title="Select your passenger category"
+        title="Select Your Passenger Category"
         lead={`Arrival type: ${state.arrival === "indian" ? "Indian" : "Foreign"}. Choose the category that matches your travel document.`}
       />
       <div className="grid two">
@@ -32,7 +32,7 @@ export default function CategoryPage() {
         </button>
         <button className={`choice${state.category === "oci" ? " selected" : ""}`} onClick={() => pick("oci")}>
           <span className="icon">{Icon.user}</span>
-          <h3>OCI holder</h3>
+          <h3>OCI Holder</h3>
           <p>Overseas Citizen of India cardholder.</p>
           <span className="go">Continue →</span>
         </button>

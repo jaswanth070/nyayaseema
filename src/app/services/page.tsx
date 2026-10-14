@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FLOWS, formatINR, type FlowId } from "@/lib/catalog";
+import { FLOWS, PLATFORM_FEE, formatINR, type FlowId } from "@/lib/catalog";
 import { useCase } from "@/lib/case";
 import { Icon } from "@/components/Icons";
 import { PageHead, useGuard } from "@/components/Ui";
@@ -15,10 +15,10 @@ const ICONS: Record<FlowId, React.ReactNode> = {
 };
 
 const FROM: Record<FlowId, string> = {
-  scanner: "Free · no forms",
-  legal: `from ${formatINR(FLOWS.legal.platformFee)}`,
-  odr: `from ${formatINR(FLOWS.odr.platformFee)}`,
-  offline: "lawyer fee only",
+  scanner: "Free · No Forms",
+  legal: `${formatINR(PLATFORM_FEE, 0)} + Lawyer's Fee`,
+  odr: `${formatINR(PLATFORM_FEE, 0)} + Lawyer's Fee`,
+  offline: `${formatINR(PLATFORM_FEE, 0)} + Lawyer's Fee`,
 };
 
 export default function ServicesPage() {
@@ -35,8 +35,8 @@ export default function ServicesPage() {
   return (
     <div className="wrap page">
       <PageHead
-        title="How can we help you today?"
-        lead={`${state.arrival === "indian" ? "Indian" : "Foreign"} · ${state.category === "oci" ? "OCI holder" : "Tourist"}. Choose a service to continue.`}
+        title="How Can We Help You Today?"
+        lead={`${state.arrival === "indian" ? "Indian" : "Foreign"} · ${state.category === "oci" ? "OCI Holder" : "Tourist"}. Choose a service to continue.`}
       />
       <div className="grid two">
         {(Object.keys(FLOWS) as FlowId[]).map((id) => (

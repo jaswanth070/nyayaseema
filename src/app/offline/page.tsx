@@ -25,13 +25,13 @@ export default function OfflineFlow() {
 
       {step === 0 && (
         <div className="card blue">
-          <h2>Case document</h2>
+          <h2>Case Document</h2>
           <div className="form-grid" style={{ marginTop: 16 }}>
             <ContactFields value={o} onChange={(v) => update({ offline: v })} />
-            <Field label="Case summary" full>
+            <Field label="Case Summary" full>
               <textarea className="input" value={o.summary} placeholder="What happened at the airport and what representation do you need?" onChange={(e) => update({ offline: { ...o, summary: e.target.value } })} />
             </Field>
-            <div className="full"><FileDrop label="Upload customs notice, bills and passport" files={o.documents} onChange={(documents) => update({ offline: { ...o, documents } })} /></div>
+            <div className="full"><FileDrop label="Upload Customs Notice, Bills and Passport" files={o.documents} onChange={(documents) => update({ offline: { ...o, documents } })} /></div>
           </div>
           {error && <p className="error-text" role="alert" style={{ marginTop: 14 }}>{error}</p>}
           <div className="actions">
@@ -40,7 +40,7 @@ export default function OfflineFlow() {
               const e = contactError(o) || (!o.summary.trim() ? "Please summarise your case." : "") || (o.documents.length === 0 ? "Upload at least one document." : "");
               if (e) return setError(e);
               setError(""); setStep(1);
-            }}>Choose jurisdiction →</button>
+            }}>Choose Jurisdiction →</button>
           </div>
         </div>
       )}
@@ -60,7 +60,7 @@ export default function OfflineFlow() {
           {error && <p className="error-text" role="alert">{error}</p>}
           <div className="actions" style={{ marginTop: 0 }}>
             <button className="btn ghost" onClick={() => { setError(""); setStep(0); }}>← Back</button>
-            <button className="btn gold" onClick={() => (state.jurisdictionId ? (setError(""), setStep(2)) : setError("Please choose a jurisdiction."))}>Choose a lawyer →</button>
+            <button className="btn gold" onClick={() => (state.jurisdictionId ? (setError(""), setStep(2)) : setError("Please choose a jurisdiction."))}>Choose a Lawyer →</button>
           </div>
         </div>
       )}
@@ -75,7 +75,7 @@ export default function OfflineFlow() {
               if (!state.lawyerId) return setError("Please choose a lawyer.");
               update({ flow: "offline" });
               router.push("/checkout");
-            }}>Proceed to payment →</button>
+            }}>Proceed to Payment →</button>
           </div>
         </div>
       )}

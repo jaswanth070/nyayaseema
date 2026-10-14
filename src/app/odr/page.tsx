@@ -29,22 +29,22 @@ export default function OdrFlow() {
 
       {step === 0 && (
         <div className="card blue">
-          <h2>Dispute details &amp; evidence</h2>
+          <h2>Dispute Details &amp; Evidence</h2>
           <p className="muted small" style={{ margin: "6px 0 18px" }}>
             Provide what customs flagged and upload original bills so your lawyer can negotiate a settlement online.
           </p>
           <div className="form-grid">
             <ContactFields value={d} onChange={(v) => update({ dispute: v })} />
-            <Field label="Items in dispute" full>
+            <Field label="Items in Dispute" full>
               <input className="input" value={d.itemsInDispute} placeholder="e.g. Gold chain 22K (18 g), smartphone" onChange={(e) => update({ dispute: { ...d, itemsInDispute: e.target.value } })} />
             </Field>
-            <Field label="Value you declared (₹)">{num("valuationClaimed")}</Field>
-            <Field label="Value assessed by customs (₹)">{num("valuationAssessed")}</Field>
-            <Field label="What did customs say? (notice / reason)" full>
+            <Field label="Value You Declared (₹)">{num("valuationClaimed")}</Field>
+            <Field label="Value Assessed by Customs (₹)">{num("valuationAssessed")}</Field>
+            <Field label="What Did Customs Say? (Notice / Reason)" full>
               <textarea className="input" value={d.notice} placeholder="Higher valuation, reclassification as commercial, quantity dispute…" onChange={(e) => update({ dispute: { ...d, notice: e.target.value } })} />
             </Field>
-            <div className="full"><FileDrop label="Upload bills / invoices" files={d.bills} onChange={(bills) => update({ dispute: { ...d, bills } })} /></div>
-            <div className="full"><FileDrop label="Upload other documents (customs notice, passport, ticket)" files={d.documents} onChange={(documents) => update({ dispute: { ...d, documents } })} /></div>
+            <div className="full"><FileDrop label="Upload Bills / Invoices" files={d.bills} onChange={(bills) => update({ dispute: { ...d, bills } })} /></div>
+            <div className="full"><FileDrop label="Upload Other Documents (Customs Notice, Passport, Ticket)" files={d.documents} onChange={(documents) => update({ dispute: { ...d, documents } })} /></div>
           </div>
           {error && <p className="error-text" role="alert" style={{ marginTop: 14 }}>{error}</p>}
           <div className="actions">
@@ -53,7 +53,7 @@ export default function OdrFlow() {
               const e = contactError(d) || (!d.itemsInDispute.trim() || !d.notice.trim() ? "Describe the items in dispute and what customs said." : "") || (d.bills.length === 0 ? "Upload at least one bill or invoice." : "");
               if (e) return setError(e);
               setError(""); setStep(1);
-            }}>Choose a lawyer →</button>
+            }}>Choose a Lawyer →</button>
           </div>
         </div>
       )}
@@ -68,7 +68,7 @@ export default function OdrFlow() {
               if (!state.lawyerId) return setError("Please choose a lawyer.");
               update({ flow: "odr" });
               router.push("/checkout");
-            }}>Proceed to payment →</button>
+            }}>Proceed to Payment →</button>
           </div>
         </div>
       )}

@@ -17,7 +17,7 @@ export default function ArrivalPage() {
   return (
     <div className="wrap page">
       <PageHead
-        title="Who is arriving?"
+        title="Who Is Arriving?"
         lead="Tell us who you are so we can apply the right baggage allowances and documentation."
       />
       <div className="grid two">

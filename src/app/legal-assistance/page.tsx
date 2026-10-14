@@ -30,7 +30,7 @@ export default function LegalAssistance() {
           <div className="actions" style={{ marginTop: 0 }}>
             <Link href="/services" className="btn ghost">← Back</Link>
             <button className="btn gold" onClick={() => (state.lawyerId ? (setError(""), setStep(1)) : setError("Please choose a lawyer to connect with."))}>
-              Connect &amp; fill documents →
+              Connect &amp; Fill Documents →
             </button>
           </div>
         </div>
@@ -38,20 +38,20 @@ export default function LegalAssistance() {
 
       {step === 1 && (
         <div className="card blue">
-          <h2>Declaration documents</h2>
+          <h2>Declaration Documents</h2>
           <p className="muted small" style={{ margin: "6px 0 18px" }}>
             Your lawyer uses these to prepare the declaration. Duty is paid together with the fee and remitted to ICEGATE.
           </p>
           <div className="form-grid">
             <ContactFields value={l} onChange={(v) => update({ legal: v })} />
-            <Field label="Customs duty payable (₹)" hint="From your declaration / the duty summary your lawyer prepared. Enter 0 if none.">
+            <Field label="Customs Duty Payable (₹)" hint="From your declaration / the duty summary your lawyer prepared. Enter 0 if none.">
               <input className="input" type="number" min={0} value={l.estimatedDuty || ""} onChange={(e) => update({ legal: { ...l, estimatedDuty: Number(e.target.value) } })} />
             </Field>
-            <Field label="Goods carried and context" full>
+            <Field label="Goods Carried and Context" full>
               <textarea className="input" value={l.summary} placeholder="e.g. 1 laptop, 2 smartphones and 20 g gold jewellery purchased in Dubai; stayed abroad 8 months." onChange={(e) => update({ legal: { ...l, summary: e.target.value } })} />
             </Field>
             <div className="full">
-              <FileDrop label="Upload passport, invoices and receipts" files={l.documents} onChange={(documents) => update({ legal: { ...l, documents } })} />
+              <FileDrop label="Upload Passport, Invoices and Receipts" files={l.documents} onChange={(documents) => update({ legal: { ...l, documents } })} />
             </div>
           </div>
           {error && <p className="error-text" role="alert" style={{ marginTop: 14 }}>{error}</p>}
@@ -62,7 +62,7 @@ export default function LegalAssistance() {
               if (e) return setError(e);
               update({ flow: "legal" });
               router.push("/checkout");
-            }}>Proceed to payment →</button>
+            }}>Proceed to Payment →</button>
           </div>
         </div>
       )}

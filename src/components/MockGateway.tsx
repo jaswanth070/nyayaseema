@@ -47,7 +47,7 @@ export function MockGateway({
         </div>
         <div className="modal-body">
           <div className="row spread">
-            <span className="muted">Amount payable</span>
+            <span className="muted">Amount Payable</span>
             <strong className="serif num" style={{ fontSize: "1.5rem", color: "var(--navy)" }}>{formatINR(amount)}</strong>
           </div>
           <p className="notice small">
@@ -56,10 +56,10 @@ export function MockGateway({
           </p>
           {err && <p className="error-text" role="alert">{err}</p>}
           <button className="btn gold" disabled={!!busy} onClick={() => pay("success")}>
-            {busy === "success" ? "Processing…" : "Pay with UPI (simulate success)"}
+            {busy === "success" ? "Processing…" : "Pay With UPI (Simulate Success)"}
           </button>
           <button className="btn ghost" disabled={!!busy} onClick={() => pay("failure")}>
-            {busy === "failure" ? "Processing…" : "Simulate failed payment"}
+            {busy === "failure" ? "Processing…" : "Simulate Failed Payment"}
           </button>
           <button className="btn ghost sm" disabled={!!busy} onClick={onClose}>Cancel</button>
         </div>
