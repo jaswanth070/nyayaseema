@@ -18,7 +18,7 @@ export function gatewayConfig(): GatewayConfig {
   return { mode: "mock", keySecret: MOCK_KEY_SECRET };
 }
 
-/** Signs order/receipt tokens and CustomsQR certificates. Falls back to the key secret so it works with 2 env vars. */
+/** Signs order and receipt tokens. Falls back to the key secret so it works with 2 env vars. */
 export function signingSecret(): string {
   const s = process.env.SIGNING_SECRET?.trim();
   if (s) return s;

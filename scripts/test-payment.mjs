@@ -51,12 +51,5 @@ check("ICEGATE reference recorded (simulated)", rec.receipt?.icegate?.status ===
 const forged = await fetch(`${BASE}/api/receipt?t=${encodeURIComponent(ok.json.receiptToken.slice(0, -3) + "AAA")}`);
 check("altered receipt token rejected", forged.status === 400);
 
-// free receipt scanner: signed pass, no payment
-const item = { id: "a", description: "Phone", category: "electronics", amount: 3199, currency: "AED", quantity: 1 };
-const sp = await post("/api/scan/pass", { items: [item] });
-// 3199 AED * 22.7 = 72,617; minus 50,000 -> 22,617 * 38.5% = 8,707.55
-check("scan pass issued without payment", sp.status === 200 && sp.json.certificate.dutyPaise === 870755 && sp.json.certificate.qr.includes(sp.json.certificate.signature), JSON.stringify(sp.json));
-check("scan pass rejects empty scan", (await post("/api/scan/pass", { items: [] })).status === 400);
-
 console.log(failed ? `\n${failed} check(s) failed` : "\nAll checks passed");
 process.exit(failed ? 1 : 0);

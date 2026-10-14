@@ -2,7 +2,7 @@
 // All lawyer records are fictitious sample data for the POC.
 
 export type FlowId = "scanner" | "legal" | "odr" | "offline";
-/** Flows that go through Razorpay. The receipt scanner is free. */
+/** Flows that go through Razorpay. The item scanner is free. */
 export type PaidFlowId = Exclude<FlowId, "scanner">;
 
 export interface FlowInfo {
@@ -18,17 +18,18 @@ export interface FlowInfo {
 export const FLOWS: Record<FlowId, FlowInfo> = {
   scanner: {
     id: "scanner",
-    title: "Receipt Scanner",
-    tagline: "Free and form-free. Scan your overseas receipts to see your estimated duty and get a signed CustomsQR pass.",
+    title: "Item Scanner",
+    tagline:
+      "Bringing products from abroad to India? Scan your item before you buy to review relevant customs information and estimated duty.",
     href: "/scanner",
     platformFee: 0,
-    steps: ["Scan receipts", "Estimated duty", "CustomsQR pass"],
+    steps: ["Scan item", "Duty summary"],
   },
   legal: {
     id: "legal",
     title: "Legal Assistance for Declaration",
     tagline:
-      "A customs advocate guides your declaration. Duty is paid through the gateway and remitted to ICEGATE.",
+      "Connect with legal assistance, understand the applicable requirements, and prepare your documents with greater confidence.",
     href: "/legal-assistance",
     platformFee: 39900,
     steps: ["Connect to lawyer", "Fill documents", "Payment", "ICEGATE remittance"],
@@ -37,7 +38,7 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
     id: "odr",
     title: "Lawyer for ODR",
     tagline:
-      "Flagged for higher valuation or reclassification? Resolve it online with a certified customs advocate.",
+      "Stopped at customs? Submit your dispute details and request virtual legal assistance, where available.",
     href: "/odr",
     platformFee: 99900,
     steps: ["Case details & bills", "Choose lawyer", "Payment to lawyer", "Lawyer ready"],
@@ -46,7 +47,7 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
     id: "offline",
     title: "Lawyer for Offline Representation",
     tagline:
-      "In-person representation before the adjudicating authority at the airport customs jurisdiction.",
+      "Need further action? Find a suitable lawyer near the relevant court or tribunal for the next stage of your case.",
     href: "/offline",
     platformFee: 0,
     steps: ["Fill document", "Choose jurisdiction", "Choose lawyer", "Payment", "Lawyer assigned"],

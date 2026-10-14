@@ -7,7 +7,7 @@ Built with **Next.js (React, TypeScript)** only — no separate backend or datab
 
 ```
 Arrival: Indian | Foreign  →  Category: Tourist | OCI holder  →  Services
-├─ Receipt Scanner            FREE, no forms: scan receipts → estimated duty → signed CustomsQR pass
+├─ Item Scanner               FREE, no forms: scan item → duty summary
 ├─ Legal Assistance           choose lawyer → fill documents → pay (fee + duty → ICEGATE)
 ├─ Lawyer for ODR             case details + bills → choose lawyer → pay → lawyer ready
 └─ Lawyer for Offline         fill document → jurisdiction → lawyer → pay → lawyer assigned
@@ -29,7 +29,7 @@ the same server-side verification as a real Razorpay payment.
 | --- | --- | --- |
 | `RAZORPAY_KEY_ID` | for live payments | Razorpay API key id (`rzp_test_…` / `rzp_live_…`) |
 | `RAZORPAY_KEY_SECRET` | for live payments | Razorpay API key secret. Server only; never exposed to the browser |
-| `SIGNING_SECRET` | recommended | Long random string that signs order/receipt tokens and CustomsQR passes. Falls back to `RAZORPAY_KEY_SECRET` |
+| `SIGNING_SECRET` | recommended | Long random string that signs order and receipt tokens. Falls back to `RAZORPAY_KEY_SECRET` |
 
 **There is no webhook and no `RAZORPAY_WEBHOOK_SECRET`.** On Vercel: Project → Settings → Environment Variables,
 add the three above for Production (and Preview if needed), then **redeploy** — env changes only apply to new deployments.
@@ -44,7 +44,7 @@ Without the Razorpay keys the deployed site stays in demo mode.
    `razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature`.
 3. `POST /api/payments/verify` checks `HMAC-SHA256("<order_id>|<payment_id>", key_secret)` against the signature,
    and that the order id matches the signed `orderToken`. Only then does it issue a signed receipt token.
-4. `/receipt?t=…` verifies the token via `GET /api/receipt` and shows the outcome (CustomsQR pass, lawyer connected /
+4. `/receipt?t=…` verifies the token via `GET /api/receipt` and shows the outcome (lawyer connected /
    ready / assigned, receipt).
 
 The app is **stateless** (signed tokens instead of a database), so it works on Vercel's serverless functions.

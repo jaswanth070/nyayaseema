@@ -2,6 +2,15 @@ import Link from "next/link";
 import { FLOWS } from "@/lib/catalog";
 import { Icon } from "@/components/Icons";
 
+const JOURNEY = [
+  { title: "Before you buy", text: "Simply scan your product with NyayaSeema to review relevant customs information and estimated duty." },
+  { title: "Need help with your declaration?", text: "Connect with legal assistance, understand the applicable requirements, and prepare your documents with greater confidence." },
+  { title: "Payment, when applicable", text: "Follow the authorized ICEGATE process and keep your payment confirmation ready." },
+  { title: "After landing in India", text: "Present your product and documents for the required customs verification and clearance." },
+  { title: "Stopped at customs?", text: "Open NyayaSeema, submit your dispute details, and request virtual legal assistance where available. Your assigned lawyer reviews your documents and supports you during the virtual hearing, where permitted." },
+  { title: "Next stage of your case", text: "If your dispute needs further action, NyayaSeema helps you find a suitable lawyer near the relevant court or tribunal." },
+];
+
 const TEAM = [
   { name: "Mufaddal Tambawala", photo: "/team/mufaddal-tambawala.webp", year: "Final Year", focus: "Product development & strategy" },
   { name: "Surya Teja Telidevara", photo: "/team/surya-teja-telidevara.webp", year: "4th Year", focus: "Legal research & legal framework" },
@@ -28,7 +37,30 @@ export default function Home() {
         <section className="page">
           <div className="eyebrow">How it works</div>
           <h2 className="page-title" style={{ fontSize: "1.9rem" }}>
-            From overseas shopping to a 5-second exit
+            Bringing products from abroad to India?
+          </h2>
+          <p className="page-lead">Understand your customs requirements before you buy.</p>
+          <hr className="rule" />
+          <ol className="journey">
+            {JOURNEY.map((j, i) => (
+              <li key={j.title} className="card">
+                <span className="journey-n">{i + 1}</span>
+                <div>
+                  <h3>{j.title}</h3>
+                  <p className="muted">{j.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className="serif" style={{ marginTop: 24, fontSize: "1.15rem", color: "var(--navy)" }}>
+            From customs preparation to legal assistance, everything connects with NyayaSeema. Shop globally, clear locally, travel stress-free.
+          </p>
+        </section>
+
+        <section className="page">
+          <div className="eyebrow">Our services</div>
+          <h2 className="page-title" style={{ fontSize: "1.9rem" }}>
+            Everything connects with NyayaSeema
           </h2>
           <hr className="rule" />
           <div className="grid four">
