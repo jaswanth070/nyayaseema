@@ -39,10 +39,10 @@ export const FLOWS: Record<FlowId, FlowInfo> = {
   },
   odr: {
     id: "odr",
-    title: "Lawyer for ODR",
+    title: "Lawyer for Virtual Assistance",
     tagline:
       "Stopped at customs? Submit your dispute details and request virtual legal assistance, where available.",
-    href: "/odr",
+    href: "/virtual-assistance",
     platformFee: PLATFORM_FEE,
     steps: ["Case Details & Bills", "Choose Lawyer", "Payment to Lawyer", "Lawyer Ready"],
   },

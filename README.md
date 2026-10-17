@@ -9,7 +9,7 @@ Built with **Next.js (React, TypeScript)** only — no separate backend or datab
 Arrival: Indian | Foreign  →  Category: Tourist | OCI holder  →  Services
 ├─ Item Scanner               FREE, no forms: scan item → duty summary
 ├─ Legal Assistance           choose lawyer → fill documents → pay (fee + duty → ICEGATE)
-├─ Lawyer for ODR             case details + bills → choose lawyer → pay → lawyer ready
+├─ Lawyer for Virtual Assistance  case details + bills → choose lawyer → pay → lawyer ready
 └─ Lawyer for Offline         fill document → jurisdiction → lawyer → pay → lawyer assigned
 ```
 
@@ -25,7 +25,7 @@ the same server-side verification as a real Razorpay payment.
 
 ## Pricing
 
-Every lawyer service (Legal Assistance, ODR, Offline) costs a flat **₹999 NyayaSeema platform fee + the lawyer's fee**
+Every lawyer service (Legal Assistance, Virtual Assistance, Offline) costs a flat **₹999 NyayaSeema platform fee + the lawyer's fee**
 (`PLATFORM_FEE` in `src/lib/catalog.ts`). Legal Assistance also collects the declared duty. The Item Scanner is free.
 
 ## Environment variables
@@ -72,7 +72,7 @@ signatures, tampered tokens, a payment replayed against another order, receipt i
 
 ## Layout
 
-- `src/app/**` — pages (`arrival`, `category`, `services`, `scanner`, `legal-assistance`, `odr`, `offline`, `checkout`, `receipt`)
+- `src/app/**` — pages (`arrival`, `category`, `services`, `scanner`, `legal-assistance`, `virtual-assistance`, `offline`, `checkout`, `receipt`)
 - `src/app/api/**` — `orders`, `payments/verify`, `receipt`, `mock/pay` (demo mode only)
 - `src/lib/` — `catalog` (flows, fees, lawyers), `duty`, `pricing`, `razorpay` (verification + signed tokens), `order`, `case` (client state)
 - Branding tokens (navy, gold, cream, Georgia serif) and artwork come from the pitch deck: `src/app/globals.css`, `public/brand/`

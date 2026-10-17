@@ -9,7 +9,7 @@ import { ContactFields, contactError } from "@/components/Contact";
 import { Field, FileDrop, PageHead, Stepper, useGuard } from "@/components/Ui";
 import { LawyerPicker } from "@/components/LawyerPicker";
 
-export default function OdrFlow() {
+export default function VirtualAssistanceFlow() {
   const router = useRouter();
   const ok = useGuard(["arrival", "category"]);
   const { state, update } = useCase();

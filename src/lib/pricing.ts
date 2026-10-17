@@ -42,7 +42,7 @@ export function quote(input: QuoteInput): Quote | { error: string } {
     lines.push({ label: "NyayaSeema Platform Fee", amount: info.platformFee, kind: "fee" });
   }
 
-  const role = input.flow === "legal" ? "Declaration Assistance" : input.flow === "odr" ? "ODR Representation" : "Offline Representation";
+  const role = input.flow === "legal" ? "Declaration Assistance" : input.flow === "odr" ? "Virtual Assistance" : "Offline Representation";
   lines.push({ label: `${lawyer.name} – ${role} (Lawyer's Fee)`, amount: lawyer.fees[input.flow], kind: "lawyer" });
 
   if (input.flow === "legal") {

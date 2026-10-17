@@ -42,12 +42,12 @@ function ReceiptView() {
 
   const headline: Record<string, { title: string; lead: string }> = {
     legal: { title: "Lawyer Connected — Declaration in Progress", lead: `${lawyer?.name ?? "Your lawyer"} has your documents and will finalise the declaration.` },
-    odr: { title: "Your Lawyer Is Ready", lead: `${lawyer?.name ?? "Your lawyer"} has been notified and your ODR case workspace is open.` },
+    odr: { title: "Your Lawyer Is Ready", lead: `${lawyer?.name ?? "Your lawyer"} has been notified and your virtual assistance workspace is open.` },
     offline: { title: "Lawyer Assigned", lead: `${lawyer?.name ?? "Your lawyer"} will represent you at ${jur?.airport ?? "the"} customs jurisdiction.` },
   };
   const timeline: Record<string, string[]> = {
     legal: ["Payment Received", "Lawyer Connected", "Duty Remitted to ICEGATE"],
-    odr: ["Payment Received", "Lawyer Notified", "Lawyer Ready — ODR Session Open"],
+    odr: ["Payment Received", "Lawyer Notified", "Lawyer Ready — Virtual Session Open"],
     offline: ["Payment Received", "Lawyer Assigned", "Appearance Scheduled With You by Lawyer"],
   };
   // Steps already complete once the payment is verified (ICEGATE remittance is simulated).
